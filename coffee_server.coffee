@@ -24,6 +24,7 @@ geodataCity = mmdb_reader.openSync('./GeoLite2-City.mmdb')
 geodata_cache = {}
 
 get_formatted_ip_address_info = (ip_address)->
+  ip_address = "31.179.116.11"
   result = geodataCity.getGeoDataSync(ip_address)
   if result
     formatted_result = result.location
@@ -55,7 +56,6 @@ createApiResponse = (req) =>
 
 #========== Express Framework configuration
 app.use(express.static('public'))
-
 
 app.get '/geo.json', (req, res) ->
   res.contentType('application/json')
