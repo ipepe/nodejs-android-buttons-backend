@@ -1,65 +1,52 @@
-#nodejs-geodata-analitics-api
+#nodejs-android-buttons-backend
 
 # ========== DEPENDENCIES
 express = require('express')
 app = express()
-mmdb_reader = require('maxmind-db-reader')
 cors = require('cors')
+geolocation = require('./geolocation')
+fs = require('fs')
 
 # ========== CONFIGURATION
-server_port = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000
-server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+server_port = process.env.PORT || 3000
+server_ip_address = '127.0.0.1'
+data_file_path = './count_value.data'
 
 # ========== SETUP EXPRESS
-if process.env.OPENSHIFT_NODEJS_IP
-  app.set('trust proxy', process.env.OPENSHIFT_NODEJS_IP )
-else if process.env.NODE_ENV == 'production'
+app.use(cors())
+if process.env.NODE_ENV == 'production'
   app.set('trust proxy', true)
 
-app.use( cors() )
-
-# ========== MAXMIND DATABASE SETUP
-geodataCity = mmdb_reader.openSync('./GeoLite2-City.mmdb')
-
-geodata_cache = {}
-
-get_formatted_ip_address_info = (ip_address)->
-  ip_address = "31.179.116.11"
-  result = geodataCity.getGeoDataSync(ip_address)
-  if result
-    formatted_result = result.location
-    formatted_result.country_code = result?.country?.iso_code
-    formatted_result.country_name = result?.country?.names?.en
-    formatted_result.ip_address = ip_address
-    formatted_result
-  else
-    null
-
-get_geodata_info = (ip_address)->
-  if ip_address
-    if geodata_cache[ip_address]
-      geodata_cache[ip_address]
-    else
-      result = get_formatted_ip_address_info(ip_address)
-      geodata_cache[ip_address] = result
-      result
-  else
-    null
-
-
 #========== APP CODE
-createApiResponse = (req) =>
-  ip_address = req.ip
-  ip_address = ip_address.split(":")[0] if ip_address
-  JSON.stringify
-    result: get_geodata_info(ip_address),
+process.countValue =
+  try
+    parseInt(fs.readFileSync(data_file_path) || '0')
+  catch
+    0
+
+setInterval((=>
+  fs.writeFile(data_file_path, process.countValue.toString(), 'utf8', undefined)
+),1000)
+
+#createApiResponse = (req) =>
+#  ip_address = req.ip
+#  ip_address = ip_address.split(":")[0] if ip_address
+#    result: geolocation.get_ip_address_geodata_info(if ip_address == '127.0.0.1' then '8.8.8.8' else ip_address)
 
 #========== Express Framework configuration
 app.use(express.static('public'))
 
-app.get '/geo.json', (req, res) ->
+app.get '/api/v1/button', (req, res) ->
   res.contentType('application/json')
-  res.send createApiResponse req
+  res.send(JSON.stringify
+    count_value: process.countValue
+  )
 
-console.log('starting server...', server_ip_address, server_port)
-server = app.listen( server_port, server_ip_address )
+app.post '/api/v1/button', (req, res) ->
+  res.contentType('application/json')
+  res.send(JSON.stringify
+    count_value: process.countValue++
+  )
+
+console.log('starting server...', server_ip_address, ':', server_port)
+app.listen(server_port, server_ip_address)
