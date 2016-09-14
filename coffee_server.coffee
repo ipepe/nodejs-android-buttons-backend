@@ -27,7 +27,7 @@ process.countValue =
 
 setInterval((=>
   fs.writeFile(data_file_path, process.countValue.toString(), 'utf8', undefined)
-),1000)
+), 1000)
 
 #createApiResponse = (req) =>
 #  ip_address = req.ip
@@ -37,22 +37,19 @@ setInterval((=>
 #========== Express Framework configuration
 app.use(express.static('public'))
 
-app.get '/api/v1/button', (req, res) ->
+app.get '/api/v1/counter_value', (req, res) ->
   res.contentType('application/json')
   res.send(JSON.stringify
     count_value: process.countValue
   )
 
-app.post '/api/v1/button', (req, res) ->
+app.post '/api/v1/increment_counter', (req, res) ->
   process.countValue++
-  io.emit('update', process.countValue)
+  io.emit('update_counter', process.countValue)
   res.contentType('application/json')
   res.send(JSON.stringify
     count_value: process.countValue
   )
-
-#io.on 'connection', (s
-
 
 console.log('starting server...', server_port)
 http.listen(server_port)

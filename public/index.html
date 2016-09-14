@@ -5,8 +5,6 @@
     <meta content="yes" name="apple-mobile-web-app-capable" />
     <title>Button Mania</title>
     <style>
-        /* Button Styles */
-
         .button {
 
             /*Step 2: Basic Button Styles*/
@@ -22,21 +20,9 @@
             font: bold 3.2em/100px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
 
             /*Step 4: Fancy CSS3 Styles*/
-            background: -webkit-linear-gradient(top, #34696f, #2f5f63);
-            background: -moz-linear-gradient(top, #34696f, #2f5f63);
-            background: -o-linear-gradient(top, #34696f, #2f5f63);
-            background: -ms-linear-gradient(top, #34696f, #2f5f63);
             background: linear-gradient(top, #34696f, #2f5f63);
-
-            -webkit-border-radius: 50px;
-            -khtml-border-radius: 50px;
-            -moz-border-radius: 50px;
             border-radius: 50px;
-
-            -webkit-box-shadow: 0 8px 2px #1b383b;
-            -moz-box-shadow: 0 8px 2px #1b383b;
             box-shadow: 0 8px 2px #1b383b;
-
             text-shadow: 0 2px 2px rgba(255, 255, 255, 0.2);
 
         }
@@ -49,43 +35,38 @@
         /*Step 5: Hover Styles*/
         a.button:hover {
             background: #3d7a80;
-            background: -webkit-linear-gradient(top, #3d7a80, #2f5f63);
-            background: -moz-linear-gradient(top, #3d7a80, #2f5f63);
-            background: -o-linear-gradient(top, #3d7a80, #2f5f63);
-            background: -ms-linear-gradient(top, #3d7a80, #2f5f63);
             background: linear-gradient(top, #3d7a80, #2f5f63);
         }
 
         a.button:active {
-            padding: 2px 0px;
-            -webkit-box-shadow: 0 2px 2px #1b383b;
-            -moz-box-shadow: 0 2px 2px #1b383b;
             box-shadow: 0 2px 2px #1b383b;
+            transform: translateY(4px);
         }
         /* @end */
     </style>
 </head>
 <body bgcolor="#7f8c8d">
     <center style="padding-top: 30px">
-        <h1 id="counter" style="color: #ecf0f1">0</h1>
+        <h1 id="counter" style="color: #ecf0f1; font-size: 3.2em;">0</h1>
         <a id="button" href="#" class="button">Click Me</a>
     </center>
     <script src="jquery-3.1.0.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script type="application/javascript">
         var socket = io();
-        navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
-        $.get('api/v1/button', function(data, status){
+        $.get('api/v1/counter_value', function(data, status){
             $('#counter').text(data.count_value);
         });
-        socket.on('update', function(counter_value){
-            $('#counter').text(counter_value)
+        setInterval(function(){
+            $.get('api/v1/counter_value', function(data, status){
+                $('#counter').text(data.count_value);
+            });
+        }, 3000);
+        socket.on('update_counter', function(counter_value){
+            $('#counter').text(counter_value);
         });
         $('#button').on('click', function(){
-            if (navigator.vibrate) {
-                navigator.vibrate(100)
-            }
-            $.post("api/v1/button", function(data, status){
+            $.post("api/v1/increment_counter", function(data, status){
                 $('#counter').text(data.count_value);
             });
         });
