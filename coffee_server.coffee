@@ -3,13 +3,14 @@
 # ========== DEPENDENCIES
 express = require('express')
 app = express()
+http = require('http').Server(app)
+io = require('socket.io')(http)
 cors = require('cors')
 geolocation = require('./geolocation')
 fs = require('fs')
 
 # ========== CONFIGURATION
 server_port = process.env.PORT || 3000
-server_ip_address = '127.0.0.1'
 data_file_path = './count_value.data'
 
 # ========== SETUP EXPRESS
@@ -43,10 +44,15 @@ app.get '/api/v1/button', (req, res) ->
   )
 
 app.post '/api/v1/button', (req, res) ->
+  process.countValue++
+  io.emit('update', process.countValue)
   res.contentType('application/json')
   res.send(JSON.stringify
-    count_value: process.countValue++
+    count_value: process.countValue
   )
 
-console.log('starting server...', server_ip_address, ':', server_port)
-app.listen(server_port, server_ip_address)
+#io.on 'connection', (s
+
+
+console.log('starting server...', server_port)
+http.listen(server_port)

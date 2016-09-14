@@ -53,7 +53,7 @@
         }
 
         a.button:active {
-            margin: 4px;
+            padding: 2px 0px;
             -webkit-box-shadow: 0 2px 2px #1b383b;
             -moz-box-shadow: 0 2px 2px #1b383b;
             box-shadow: 0 2px 2px #1b383b;
@@ -62,8 +62,25 @@
     </style>
 </head>
 <body>
-<center style="padding-top: 30px">
-    <a href="#" class="button">Click Me</a>
-</center>
+    <center style="padding-top: 30px">
+        <h1 id="counter">0</h1>
+        <a id="button" href="#" class="button">Click Me</a>
+    </center>
+    <script src="jquery-3.1.0.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="application/javascript">
+        var socket = io();
+        $.get('api/v1/button', function(data, status){
+            $('#counter').text(data.count_value);
+        });
+        socket.on('update', function(counter_value){
+            $('#counter').text(counter_value)
+        });
+        $('#button').on('click', function(){
+            $.post("api/v1/button", function(data, status){
+                $('#counter').text(data.count_value);
+            });
+        });
+    </script>
 </body>
 </html>
