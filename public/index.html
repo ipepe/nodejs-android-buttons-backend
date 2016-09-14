@@ -70,6 +70,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script type="application/javascript">
         var socket = io();
+        navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
         $.get('api/v1/button', function(data, status){
             $('#counter').text(data.count_value);
         });
@@ -77,6 +78,9 @@
             $('#counter').text(counter_value)
         });
         $('#button').on('click', function(){
+            if (navigator.vibrate) {
+                navigator.vibrate(100)
+            }
             $.post("api/v1/button", function(data, status){
                 $('#counter').text(data.count_value);
             });
